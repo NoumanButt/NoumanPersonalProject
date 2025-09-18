@@ -48,6 +48,14 @@ Result: `bundle/<timestamp>_<Title>/` with `inputs/` + `outputs/` and a `.zip` n
 - Slideshow text/length/colors/font: `content/episode_002_storyboard.json`
 - Background for image mode: `assets/background.jpg` (auto‑generated if missing)
 
+## Higher-Quality Visuals (B‑roll)
+- Add images/videos under `assets/broll/` (name/number them in display order).
+- Optional: place a background music track at `assets/music.mp3`.
+- Assemble a cinematic cut with crossfades and audio ducking:
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\assemble_broll.ps1 -BrollDir .\assets\broll -Audio .\build\narration.wav -Music .\assets\music.mp3 -Duration 6 -OutVideo .\build\broll_video.mp4`
+- Then package:
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\prepare_release.ps1 -Title "Your Title" -Video .\build\broll_video.mp4 -Captions .\build\narration.srt -Thumbnail .\build\thumbnail.jpg`
+
 ## Troubleshooting
 - FFmpeg not found: restart PowerShell, or ensure it’s on PATH
 - Captions skipped: install with `py -m pip install whisper-ctranslate2`
