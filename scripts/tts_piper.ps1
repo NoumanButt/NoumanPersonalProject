@@ -27,9 +27,9 @@ if (-not $piper) { throw "piper not found on PATH. Install Piper and ensure 'pip
 
 if (-not (Test-Path -LiteralPath $VoiceModel)) { throw "Voice model not found: $VoiceModel" }
 
-$args = @('-m', $VoiceModel, '-f', $OutPath, '-l', ([string]$LengthScale), '-s', ([string]$NoiseScale), '-w', ([string]$NoiseW))
-if ($VoiceConfig) { $args += @('-c', $VoiceConfig) }
-if ($Speaker -ge 0) { $args += @('-p', ([string]$Speaker)) }
+$args = @('--model', $VoiceModel, '--output-file', $OutPath, '--length-scale', ([string]$LengthScale), '--noise-scale', ([string]$NoiseScale), '--noise-w-scale', ([string]$NoiseW))
+if ($VoiceConfig) { $args += @('--config', $VoiceConfig) }
+if ($Speaker -ge 0) { $args += @('--speaker', ([string]$Speaker)) }
 
 if (-not $Text -and -not $TextPath) {
   throw 'Provide -Text or -TextPath for narration.'
@@ -40,21 +40,13 @@ if (-not $Text) {
   $Text = Get-Content -LiteralPath $TextPath -Raw
 }
 
-$utf8 = [System.Text.Encoding]::UTF8
-$bytes = $utf8.GetBytes($Text)
+# Write text to a temp file and call Piper with -i for better compatibility
+$tmpIn = Join-Path (Split-Path -Parent $OutPath) 'piper_input.txt'
+Set-Content -Encoding UTF8 -LiteralPath $tmpIn -Value $Text
 
-$psi = New-Object System.Diagnostics.ProcessStartInfo
-$psi.FileName = $piper.Source
-$psi.ArgumentList.AddRange($args)
-$psi.RedirectStandardInput = $true
-$psi.UseShellExecute = $false
-$psi.CreateNoWindow = $true
-$proc = [System.Diagnostics.Process]::Start($psi)
-$proc.StandardInput.BaseStream.Write($bytes, 0, $bytes.Length)
-$proc.StandardInput.Close()
-$proc.WaitForExit()
+if (Test-Path -LiteralPath $OutPath) { Remove-Item -LiteralPath $OutPath -Force }
+& piper @args -i $tmpIn
 
 if (-not (Test-Path -LiteralPath $OutPath)) { throw "Failed to create $OutPath" }
 $fi = Get-Item -LiteralPath $OutPath
 Write-Host "Generated with Piper: $($fi.FullName) ($([Math]::Round($fi.Length/1KB,2)) KB)" -ForegroundColor Green
-

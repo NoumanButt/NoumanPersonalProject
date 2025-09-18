@@ -1,0 +1,4 @@
+﻿Title: Sample Test Video
+
+This is a short sample narration to verify the new text to speech and b-roll assembly pipeline.
+We will generate voice, build b-roll visuals, and package everything for upload.
