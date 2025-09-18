@@ -3,7 +3,10 @@ Param(
   [string]$Audio = "build/narration.wav",
   [string]$Music = "assets/music.mp3",
   [int]$Duration = 6,
-  [string]$OutVideo = "build/broll_video.mp4"
+  [string]$OutVideo = "build/broll_video.mp4",
+  [int]$Width = 1920,
+  [int]$Height = 1080,
+  [int]$Fps = 30
 )
 
 $ErrorActionPreference = 'Stop'
@@ -23,7 +26,7 @@ Ensure-Dir $tmp
 Remove-Item -LiteralPath $tmp\* -Force -Recurse -ErrorAction SilentlyContinue
 Ensure-Dir $tmp
 
-$fps = 25
+$fps = $Fps
 
 $segs = @()
 $idx = 0
@@ -32,9 +35,9 @@ foreach ($it in $items) {
   $seg = Join-Path $tmp ('seg{0:D2}.mp4' -f $idx)
   $ext = $it.Extension.ToLower()
   if ($ext -in @('.jpg','.jpeg','.png')) {
-    ffmpeg -y -hide_banner -loglevel error -loop 1 -t $Duration -i "$($it.FullName)" -vf "scale=1280:720,format=yuv420p,fade=t=in:st=0:d=0.5,fade=t=out:st=$([Math]::Max(0,[Math]::Round($Duration-0.5,2))):d=0.5" -r $fps -c:v libx264 -pix_fmt yuv420p -an "$seg"
+    ffmpeg -y -hide_banner -loglevel error -loop 1 -t $Duration -i "$($it.FullName)" -vf "scale=${Width}:${Height},format=yuv420p,fade=t=in:st=0:d=0.5,fade=t=out:st=$([Math]::Max(0,[Math]::Round($Duration-0.5,2))):d=0.5" -r $fps -c:v libx264 -pix_fmt yuv420p -an "$seg"
   } else {
-    ffmpeg -y -hide_banner -loglevel error -t $Duration -i "$($it.FullName)" -vf "scale=1280:720,format=yuv420p,fade=t=in:st=0:d=0.5,fade=t=out:st=$([Math]::Max(0,[Math]::Round($Duration-0.5,2))):d=0.5" -r $fps -c:v libx264 -pix_fmt yuv420p -an "$seg"
+    ffmpeg -y -hide_banner -loglevel error -t $Duration -i "$($it.FullName)" -vf "scale=${Width}:${Height},format=yuv420p,fade=t=in:st=0:d=0.5,fade=t=out:st=$([Math]::Max(0,[Math]::Round($Duration-0.5,2))):d=0.5" -r $fps -c:v libx264 -pix_fmt yuv420p -an "$seg"
   }
   $segs += $seg
 }
@@ -47,9 +50,9 @@ Pop-Location
 
 # Mix audio (narration + optional music with ducking)
 if (Test-Path -LiteralPath $Music) {
-  ffmpeg -y -hide_banner -loglevel error -i "$OutVideo" -i "$Audio" -i "$Music" -filter_complex "[2:a]volume=0.12[m];[1:a][m]sidechaincompress=threshold=0.05:ratio=8:attack=5:release=350:makeup=3[a]" -map 0:v -map "[a]" -shortest -c:v libx264 -pix_fmt yuv420p -c:a aac -b:a 192k "$OutVideo.tmp.mp4"
+  ffmpeg -y -hide_banner -loglevel error -i "$OutVideo" -i "$Audio" -i "$Music" -filter_complex "[2:a]volume=0.12[m];[1:a][m]sidechaincompress=threshold=0.05:ratio=8:attack=5:release=350:makeup=3[a]" -map 0:v -map "[a]" -shortest -c:v libx264 -pix_fmt yuv420p -profile:v high -level 4.2 -r $fps -c:a aac -b:a 192k "$OutVideo.tmp.mp4"
 } else {
-  ffmpeg -y -hide_banner -loglevel error -i "$OutVideo" -i "$Audio" -map 0:v -map 1:a -shortest -c:v libx264 -pix_fmt yuv420p -c:a aac -b:a 192k "$OutVideo.tmp.mp4"
+  ffmpeg -y -hide_banner -loglevel error -i "$OutVideo" -i "$Audio" -map 0:v -map 1:a -shortest -c:v libx264 -pix_fmt yuv420p -profile:v high -level 4.2 -r $fps -c:a aac -b:a 192k "$OutVideo.tmp.mp4"
 }
 if (Test-Path -LiteralPath "$OutVideo.tmp.mp4") { Move-Item -Force "$OutVideo.tmp.mp4" "$OutVideo" }
 

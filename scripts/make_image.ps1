@@ -4,7 +4,8 @@ Param(
     [int]$Height = 720,
     [string]$Background = "#111827",
     [string]$Foreground = "#F9FAFB",
-    [string]$Text = "Your Channel"
+    [string]$Text = "Your Channel",
+    [string]$Font = 'Arial'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -35,7 +36,7 @@ $gfx.SmoothingMode = 'AntiAlias'
 $gfx.Clear((From-HexColor $Background))
 
 $fontSize = [Math]::Max(28, [Math]::Min($Height/8, 72))
-$font = New-Object System.Drawing.Font('Arial', $fontSize, [System.Drawing.FontStyle]::Bold)
+$font = New-Object System.Drawing.Font($Font, $fontSize, [System.Drawing.FontStyle]::Bold)
 $brush = New-Object System.Drawing.SolidBrush (From-HexColor $Foreground)
 
 $fmt = New-Object System.Drawing.StringFormat

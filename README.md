@@ -77,3 +77,11 @@ Windows’ built‑in voice is convenient but basic. For higher quality:
   `py -m pip install TTS` then `tts --text "..." --model_name tts_models/en/vctk/vits --out_path build/narration.wav`
 
 - Cloud (best quality, paid): Azure Neural TTS, ElevenLabs, Amazon Polly. Export WAV to `build/narration.wav` and run `make_video.ps1 -UseExistingAudio`.
+
+Arabic‑accent English (recommended via Azure TTS)
+- Use an Arabic voice to read English text through SSML.
+- Set env vars once (PowerShell):
+  - `$env:AZURE_TTS_KEY="<your-key>"; $env:AZURE_TTS_REGION="<your-region>"`
+- Generate narration:
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\tts_azure.ps1 -TextPath .\content\your_script.txt -Voice ar-EG-SalmaNeural -Locale en-US -OutPath .\build\narration.wav`
+- Then build the video with `-UseExistingAudio` as shown above.

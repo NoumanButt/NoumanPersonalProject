@@ -1,0 +1,12 @@
+1
+00:00:00,000 --> 00:00:02,960
+Title, high-res test video
+
+2
+00:00:02,960 --> 00:00:06,960
+This is a high-resolution test video with multiple scenes
+
+3
+00:00:06,960 --> 00:00:12,400
+We are assembling 1080p visuals from B-roll and mixing them with narration audio
+
