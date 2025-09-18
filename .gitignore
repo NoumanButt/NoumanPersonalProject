@@ -1,0 +1,7 @@
+# Build artifacts
+build/
+
+# OS files
+Thumbs.db
+Desktop.ini
+

@@ -1,0 +1,3 @@
+Welcome to your first AI-assisted YouTube video.
+This short demo will generate narration using Windows built-in text to speech.
+In the next step, we will combine this audio with a background image to make a simple video.
