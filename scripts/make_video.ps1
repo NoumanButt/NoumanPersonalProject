@@ -5,7 +5,8 @@ Param(
     [ValidateSet('slideshow','image')][string]$Mode = 'slideshow',
     [string]$Storyboard = "content/episode_002_storyboard.json",
     [string]$BackgroundText,
-    [switch]$GenerateCaptions = $true
+    [switch]$GenerateCaptions = $true,
+    [switch]$UseExistingAudio = $false
 )
 
 $ErrorActionPreference = 'Stop'
@@ -57,9 +58,13 @@ function Make-Thumbnail() {
   powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $scripts 'make_thumbnail.ps1') -Text $Title -OutPath 'build/thumbnail.jpg' | Out-Null
 }
 
-# 1) TTS
-if (-not $Text -and -not $TextPath) { throw 'Provide -Text or -TextPath for narration.' }
-Run-TTS -inTextPath $TextPath -inlineText $Text
+# 1) TTS (or reuse existing narration)
+if ($UseExistingAudio -and (Test-Path 'build/narration.wav')) {
+  Write-Host 'Using existing build/narration.wav' -ForegroundColor Yellow
+} else {
+  if (-not $Text -and -not $TextPath) { throw 'Provide -Text or -TextPath for narration (or pass -UseExistingAudio with build/narration.wav present).' }
+  Run-TTS -inTextPath $TextPath -inlineText $Text
+}
 
 # 2) Visuals
 $videoPath = if ($Mode -eq 'slideshow') { Build-Slideshow $Storyboard } else { Build-ImageVideo }

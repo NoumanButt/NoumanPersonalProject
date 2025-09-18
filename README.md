@@ -54,3 +54,18 @@ Result: `bundle/<timestamp>_<Title>/` with `inputs/` + `outputs/` and a `.zip` n
 - Execution policy errors: use `-ExecutionPolicy Bypass` as shown above
 
 For more details, see `youtube_ai_workflow.md`.
+
+## Better Voices (Optional)
+Windows’ built‑in voice is convenient but basic. For higher quality:
+
+- Piper (offline, fast, open‑source)
+  1) Install Piper and download a high‑quality voice (.onnx + .json).
+  2) Generate narration:
+     `powershell -ExecutionPolicy Bypass -File .\scripts\tts_piper.ps1 -TextPath .\content\your_script.txt -VoiceModel .\voices\en_US-amy-medium.onnx -VoiceConfig .\voices\en_US-amy-medium.onnx.json -OutPath .\build\narration.wav`
+  3) Build the video using the existing audio (skip TTS):
+     `powershell -ExecutionPolicy Bypass -File .\scripts\make_video.ps1 -Title "Your Title" -Mode slideshow -Storyboard .\content\episode_002_storyboard.json -UseExistingAudio`
+
+- Coqui TTS (offline, high quality, heavier):
+  `py -m pip install TTS` then `tts --text "..." --model_name tts_models/en/vctk/vits --out_path build/narration.wav`
+
+- Cloud (best quality, paid): Azure Neural TTS, ElevenLabs, Amazon Polly. Export WAV to `build/narration.wav` and run `make_video.ps1 -UseExistingAudio`.
